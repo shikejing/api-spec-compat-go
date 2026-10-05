@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info: {title: Good, version: 1.0.0}
+paths:
+  /ok:
+    get:
+      operationId: getOk
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: {type: string}
