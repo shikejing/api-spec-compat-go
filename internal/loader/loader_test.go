@@ -135,3 +135,25 @@ func TestLoadSwagger2(t *testing.T) {
 		t.Error("definitions not normalized into Components")
 	}
 }
+
+func TestCrossFileCycle(t *testing.T) {
+	// A references B in another file, which references back into A.
+	// Loading must terminate without deadlock or crash.
+	doc := loadTestDoc(t, "testdata/cycle/a.yaml")
+	a := doc.Components["A"]
+	if a == nil {
+		t.Fatal("component A missing")
+	}
+	b := spec.Deref(a.Properties["b"])
+	if b == nil || b.Type != "object" {
+		t.Fatalf("B = %+v", b)
+	}
+	back := b.Properties["a"]
+	if back == nil {
+		t.Fatal("B.a missing")
+	}
+	// The back-reference is either a cyclic placeholder or an alias to A.
+	if !back.Cyclic && spec.Deref(back) != a {
+		t.Fatalf("unexpected back-reference: %+v", back)
+	}
+}

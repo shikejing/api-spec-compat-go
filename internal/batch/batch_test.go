@@ -1,6 +1,9 @@
 package batch
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/shikejing/api-spec-compat-go/internal/lint"
@@ -106,3 +109,53 @@ func TestDiffPairs(t *testing.T) {
 		}
 	}
 }
+
+func TestManyDocuments(t *testing.T) {
+	dir := t.TempDir()
+	var files []string
+	for i := 0; i < 100; i++ {
+		p := filepath.Join(dir, fmt.Sprintf("doc%03d.yaml", i))
+		content := good
+		if i%10 == 0 {
+			content = bad // every 10th doc has an error-level finding
+		}
+		if err := os.WriteFile(p, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		files = append(files, p)
+	}
+	s := LintFiles(files, Options{Concurrency: 8, Config: lint.DefaultConfig()})
+	if len(s.Results) != 100 {
+		t.Fatalf("results = %d", len(s.Results))
+	}
+	if s.ErrorCount != 10 {
+		t.Errorf("ErrorCount = %d, want 10", s.ErrorCount)
+	}
+	if s.OK {
+		t.Error("summary should not be OK")
+	}
+}
+
+const good = `openapi: 3.0.0
+info: {title: Good, version: 1.0.0}
+paths:
+  /ok:
+    get:
+      operationId: getOk
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: {type: string}
+`
+
+const bad = `openapi: 3.0.0
+info: {title: Bad, version: 1.0.0}
+paths:
+  /bad:
+    get:
+      responses:
+        '200':
+          description: ok
+`
