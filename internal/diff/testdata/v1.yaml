@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info: {title: Shop, version: 1.0.0}
+paths:
+  /items:
+    get:
+      operationId: listItems
+      parameters:
+        - name: filter
+          in: query
+          schema: {type: string}
+        - name: limit
+          in: query
+          required: true
+          schema: {type: integer, format: int32}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: bad request
+    post:
+      operationId: createItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        '201':
+          description: created
+  /legacy:
+    get:
+      operationId: legacy
+      responses:
+        '200':
+          description: ok
+components:
+  schemas:
+    Item:
+      type: object
+      required: [id, name]
+      properties:
+        id: {type: integer, format: int64}
+        name: {type: string}
+        status: {type: string, enum: [active, archived]}
+        count: {type: integer}
+        note: {type: string, nullable: true}
+        shape:
+          oneOf:
+            - type: string
+            - type: integer
