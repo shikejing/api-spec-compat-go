@@ -78,8 +78,11 @@ type Response struct {
 // loading; a cycle is represented by a node with Cyclic set and Ref
 // naming the component it points back to.
 type Schema struct {
-	Ref                  string             `json:"ref,omitempty"` // component name this node was resolved from, if any
-	Cyclic               bool               `json:"cyclic,omitempty"`
+	Ref    string `json:"ref,omitempty"` // component name this node was resolved from, if any
+	Cyclic bool   `json:"cyclic,omitempty"`
+	// Alias points at the shared resolved schema when this node is a
+	// reference wrapper; nil for inline schemas and cyclic placeholders.
+	Alias                *Schema            `json:"-"`
 	Type                 string             `json:"type,omitempty"`
 	Format               string             `json:"format,omitempty"`
 	Nullable             bool               `json:"nullable,omitempty"`
@@ -104,4 +107,15 @@ func (s *Schema) RequiredSet() map[string]bool {
 		m[r] = true
 	}
 	return m
+}
+
+// Deref follows reference wrappers to the underlying schema. Cyclic
+// placeholders and nil are returned as-is.
+func Deref(s *Schema) *Schema {
+	seen := map[*Schema]bool{}
+	for s != nil && s.Alias != nil && !seen[s] {
+		seen[s] = true
+		s = s.Alias
+	}
+	return s
 }
