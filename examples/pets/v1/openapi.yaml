@@ -1,0 +1,59 @@
+openapi: 3.0.3
+info:
+  title: Pet Store
+  version: "1.0.0"
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: a list of pets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "../common-types.yaml#/components/schemas/PetStatus"
+    post:
+      operationId: createPet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: {type: string}
+                status:
+                  $ref: "../common-types.yaml#/components/schemas/PetStatus"
+      responses:
+        '201':
+          description: created
+  /pets/{petId}:
+    get:
+      operationId: getPet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: a pet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: {type: string}
+                  name: {type: string}

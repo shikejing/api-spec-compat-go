@@ -1,0 +1,18 @@
+# Rule severities: off | info | warning | error
+rules:
+  info-title-required: warning
+  operation-operationId: warning
+  operation-operationId-unique: error
+  path-params-defined: error
+  path-no-operations: warning
+  response-success-defined: warning
+  response-description: info
+  schema-type-valid: error
+  ref-no-cycles: info
+  array-items-defined: error
+  enum-not-empty: error
+  enum-unique-values: warning
+  object-required-defined: error
+  # Opt-in naming convention (off unless you enable it):
+  property-naming-snake-case: off
+  operation-deprecated: info
