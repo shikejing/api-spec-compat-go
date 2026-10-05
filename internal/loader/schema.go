@@ -50,6 +50,7 @@ func (r *resolver) buildSchema(node *yaml.Node, file string) (*spec.Schema, erro
 		}
 	}
 	if enum := mappingValue(node, "enum"); enum != nil && enum.Kind == yaml.SequenceNode {
+		s.Enum = make([]any, 0, len(enum.Content))
 		for _, item := range enum.Content {
 			var v any
 			if err := item.Decode(&v); err != nil {

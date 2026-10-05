@@ -16,11 +16,11 @@ type DocResult struct {
 
 // Summary is the aggregate machine-readable result.
 type Summary struct {
-	Results   []DocResult     `json:"results"`
-	Diffs     []DiffResult    `json:"diffs,omitempty"`
-	ErrorCount int            `json:"errorCount"`
-	WarnCount  int            `json:"warnCount"`
-	OK        bool            `json:"ok"`
+	Results    []DocResult  `json:"results"`
+	Diffs      []DiffResult `json:"diffs,omitempty"`
+	ErrorCount int          `json:"errorCount"`
+	WarnCount  int          `json:"warnCount"`
+	OK         bool         `json:"ok"`
 }
 
 // DiffResult is the outcome of comparing one pair of documents.

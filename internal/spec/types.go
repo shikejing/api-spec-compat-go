@@ -3,7 +3,10 @@
 // loaded into before linting or diffing.
 package spec
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 // Location points at a position in a source file.
 type Location struct {
@@ -118,4 +121,15 @@ func Deref(s *Schema) *Schema {
 		s = s.Alias
 	}
 	return s
+}
+
+// SortedKeys returns the keys of a map in sorted order, for
+// deterministic iteration.
+func SortedKeys[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
