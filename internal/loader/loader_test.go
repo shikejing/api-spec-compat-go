@@ -94,3 +94,44 @@ func TestDeterministicRepeatedLoad(t *testing.T) {
 		t.Fatal("repeated loads diverge")
 	}
 }
+
+func TestLoadSwagger2(t *testing.T) {
+	doc := loadTestDoc(t, "testdata/swagger2.yaml")
+	if doc.Version != spec.VersionSwagger2 {
+		t.Fatalf("version = %v", doc.Version)
+	}
+	item := doc.Paths["/users/{id}"]
+	if item == nil {
+		t.Fatal("missing path")
+	}
+	get := item.Operations["get"]
+	// path-level param merged into operation.
+	var idParam, verboseParam *spec.Parameter
+	for _, p := range get.Parameters {
+		switch p.Name {
+		case "id":
+			idParam = p
+		case "verbose":
+			verboseParam = p
+		}
+	}
+	if idParam == nil || !idParam.Required || idParam.Schema.Type != "integer" {
+		t.Errorf("id param = %+v", idParam)
+	}
+	if verboseParam == nil || verboseParam.Schema.Type != "boolean" {
+		t.Errorf("verbose param = %+v", verboseParam)
+	}
+	if spec.Deref(get.Responses["200"].Schema).Properties["name"] == nil {
+		t.Error("response schema not resolved")
+	}
+	put := item.Operations["put"]
+	if put.RequestBody == nil {
+		t.Fatal("body parameter not lifted into RequestBody")
+	}
+	if spec.Deref(put.RequestBody).Ref != "User" {
+		t.Errorf("request body = %+v", put.RequestBody)
+	}
+	if doc.Components["User"] == nil {
+		t.Error("definitions not normalized into Components")
+	}
+}
